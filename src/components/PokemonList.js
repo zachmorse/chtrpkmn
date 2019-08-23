@@ -34,12 +34,7 @@ const PokemonList = props => {
     );
   });
 
-  return <div className="cardContainer">
-            {props.renderList 
-              ? list 
-              : <div>"No results available with current search and filter settings"</div>
-            }
-         </div>;
+  return <div className="cardContainer">{props.renderList ? list : <div>No results available with current search and filter settings.</div>}</div>;
 };
 
 export default PokemonList;

@@ -23,6 +23,15 @@ li {
 	font-size: 12px;
 }
 
+.form {
+	width: 70%;
+	margin: auto;
+}
+
+.selectBox {
+	margin: 10px 0;
+}
+
 form text {
 	text-align: center;
 }

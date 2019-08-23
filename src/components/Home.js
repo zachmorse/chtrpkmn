@@ -10,25 +10,23 @@ class Home extends Component {
   state = {
     data: [],
     searchTerm: "",
-    traits: ["Fire", "Water", "Grass", "Electric", "Psychic", "Steel", "Normal", "Fairy", "Dark", "Flying", "Ghost", "Poison", "Ice", "Ground", "Rock", "Dragon", "Fighting", "Bug"],
+    types: ["Fire", "Water", "Grass", "Electric", "Psychic", "Normal", "Flying", "Ghost", "Poison", "Ice", "Ground", "Rock", "Dragon", "Fighting", "Bug"],
+    weaknesses: ["Fire", "Water", "Grass", "Electric", "Psychic", "Normal", "Fairy", "Dark", "Steel", "Flying", "Ghost", "Poison", "Ice", "Ground", "Rock", "Dragon", "Fighting", "Bug"],
     isloaded: false,
-
     enoughData: true,
     checkedTypes: [],
     checkedWeaknesses: []
   };
 
-  fetchItems = (searchTerm, type = [], weaknesses = []) => {
+  fetchItems = (searchTerm = "", types = [], weaknesses = []) => {
     axios
       .get(`https://raw.githubusercontent.com/Biuni/PokemonGO-Pokedex/master/pokedex.json`)
       .then(response => {
-        let parsedResponse = this.parseSearchResults(response.data.pokemon, searchTerm);
-        let filteredResponse = this.filterSearchResults(parsedResponse, type, weaknesses);
-        console.log(this.state);
+        let parsedResponse = this.parseSearchResults(response.data.pokemon, searchTerm, types, weaknesses);
         this.setState({
-          data: filteredResponse,
+          data: parsedResponse,
           isloaded: true,
-          enoughData: filteredResponse.length >= 1 ? true : false
+          enoughData: parsedResponse.length >= 1 ? true : false
         });
       })
       .catch(err => {
@@ -36,7 +34,7 @@ class Home extends Component {
       });
   };
 
-  initiateSearch = e => {
+  handleFormSubmit = e => {
     let { searchTerm, checkedTypes, checkedWeaknesses } = this.state;
     e.preventDefault();
     this.fetchItems(searchTerm, checkedTypes, checkedWeaknesses);
@@ -48,20 +46,37 @@ class Home extends Component {
     });
   };
 
-  handleTypeChange = (e) => {
+  handleTypeChange = e => {
     this.setState({
       checkedTypes: e
-    })
+    });
   };
 
-  handleWeaknessChange = (e) => {
+  handleWeaknessChange = e => {
     this.setState({
       checkedWeaknesses: e
-    })
+    });
   };
 
-  parseSearchResults = (input, searchTerm)=> {
+  applyFilters = (input, parameters, value) => {
+    let parsed = [];
+    if (parameters.length > 0) {
+      input.forEach(element => {
+        if (_.difference(parameters, element[value]).length === 0) {
+          parsed.push(element);
+        }
+      });
+      return parsed;
+    }
+    return input;
+  };
+
+  parseSearchResults = (input, searchTerm, types, weaknesses) => {
     let resultant = [];
+
+    if (searchTerm === "") {
+      resultant = input;
+    }
 
     if (searchTerm !== "" && searchTerm !== undefined) {
       input.forEach(element => {
@@ -69,67 +84,36 @@ class Home extends Component {
           resultant.push(element);
         }
       });
-      return resultant;
     }
-    return input;
-  }
 
-  filterSearchResults = (input, type, weaknesses) => {
-    let parsedArray = input;
-    if (type.length > 0) {
-      type.forEach(type => {
-        // parsedArray.forEach((element, index) => {
-        //   console.log(`checking to see if ${type} exists in ${element.type} at ${element.id - 1}`);
-        //   if (element.type.indexOf(type) === -1) {
-        //     console.log("it does not, so cut it from the array");
-        //     parsedArray.splice(element.id - 1, 1);
-        //   }
-        // });
-
-        // use the type and compare that with the types found in the parsedArray
-        // if you find it (index of > -1) then use splice to cut it out
-        // type is the checkbox params, compare that to the elements
-
-
-      });
-      
-    }
-    console.log("PARSED:", parsedArray);
-    return parsedArray;
-  }
+    resultant = this.applyFilters(this.applyFilters(resultant, types, "type"), weaknesses, "weaknesses");
+    return resultant;
+  };
 
   async componentDidMount() {
     await this.fetchItems();
   }
 
   render() {
-    const { data, isloaded, searchTerm, enoughData, traits, checkedTypes, checkedWeaknesses, formSubmitted } = this.state;
+    const { data, isloaded, searchTerm, enoughData, types, weaknesses, checkedTypes, checkedWeaknesses } = this.state;
 
     return (
       <div>
         <h1 style={{ textAlign: "center" }}>Catch 'Em All</h1>
         <div className="form" style={{ textAlign: "center", marginBottom: "30px" }}>
-          <form onSubmit={this.initiateSearch}>
+          <form onSubmit={this.handleFormSubmit}>
             <input type="text" value={searchTerm} placeholder="Enter search term" onChange={this.handleSearchChange} />
-            <label>
-              <Multiselect 
-                options={traits} 
-                isObject={false} 
-                onSelect={this.handleTypeChange} 
-                onRemove={this.handleTypeChange} 
-                selectedvalues={checkedTypes} 
-                placeholder={"Filter Types:"}/>
+            <label className="selectBox">
+              <div className="selectBox">
+                <Multiselect options={types} isObject={false} onSelect={this.handleTypeChange} onRemove={this.handleTypeChange} selectedvalues={checkedTypes} placeholder={"Filter Types:"} />
+              </div>
             </label>
             <label>
-              <Multiselect 
-                options={traits} 
-                isObject={false} 
-                onSelect={this.handleWeaknessChange} 
-                onRemove={this.handleWeaknessChange} 
-                selectedvalues={checkedWeaknesses} 
-                placeholder={"Filter Weaknesses:"}/>
+              <div className="selectBox">
+                <Multiselect options={weaknesses} isObject={false} onSelect={this.handleWeaknessChange} onRemove={this.handleWeaknessChange} selectedvalues={checkedWeaknesses} placeholder={"Filter Weaknesses:"} />
+              </div>
             </label>
-            <input type="submit" value={formSubmitted ? "Update Search" : "Perform Search" } />
+            <input type="submit" value="search" />
           </form>
         </div>
         {isloaded && <PokemonList stuff={data} renderList={enoughData} />}
