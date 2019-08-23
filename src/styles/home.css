@@ -9,6 +9,11 @@ html {
 	}
 }
 
+@font-face {
+	font-family: "Lazer84";
+	src: url("../fonts/Lazer84.ttf");
+}
+
 body {
 	max-width: 1280px;
 	margin: auto;
@@ -34,4 +39,33 @@ li {
 
 form text {
 	text-align: center;
+}
+
+.headerTitle {
+	text-align: center;
+	font-size: 8vw;
+	font-family: "Lazer84";
+	background: #3B4CCA;
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+	text-shadow: -2px -4px 0px #FFDE00;
+}
+
+@media screen and (min-width: 500px) {
+	.headerTitle {
+		text-shadow: -2px -6px 0px #FFDE00;
+	}
+}
+
+@media screen and (min-width: 750px) {
+	.headerTitle {
+		text-shadow: -2px -8px 0px #FFDE00;
+	}
+}
+
+@media screen and (min-width: 1015px) {
+	.headerTitle {
+		font-size: 6vw;
+		text-shadow: -2px -10px 0px #FFDE00;
+	}
 }

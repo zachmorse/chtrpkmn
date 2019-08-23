@@ -6,7 +6,7 @@ import "../styles/home.css";
 
 import PokemonList from "./PokemonList";
 
-class Home extends Component {
+export default class Home extends Component {
   state = {
     data: [],
     searchTerm: "",
@@ -99,7 +99,7 @@ class Home extends Component {
 
     return (
       <div>
-        <h1 style={{ textAlign: "center" }}>Catch 'Em All</h1>
+        <h1 className="headerTitle">Gotta Catch 'Em All!</h1>
         <div className="form" style={{ textAlign: "center", marginBottom: "30px" }}>
           <form onSubmit={this.handleFormSubmit}>
             <input type="text" value={searchTerm} placeholder="Enter search term" onChange={this.handleSearchChange} />
@@ -121,5 +121,3 @@ class Home extends Component {
     );
   }
 }
-
-export default Home;
