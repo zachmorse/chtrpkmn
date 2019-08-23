@@ -6,11 +6,6 @@ const PokemonList = props => {
     return array.join(", ");
   };
 
-  console.log(props);
-
-  // here, we need to parse through the list, before it is mapped out
-  // that way we can avoid mapping things we don't need
-
   let list = props.stuff.map((pokemon, index) => {
     const { name, num, type, img, weaknesses } = pokemon;
     return (
@@ -20,7 +15,6 @@ const PokemonList = props => {
         </div>
         <div className="cardTextContainer">
           <h2 className="cardName">{name}</h2>
-
           <div className="cardInfo">
             <p>
               <span>Card: </span>
@@ -40,7 +34,12 @@ const PokemonList = props => {
     );
   });
 
-  return <div className="cardContainer">{list}</div>;
+  return <div className="cardContainer">
+            {props.renderList 
+              ? list 
+              : <div>"No results available with current search and filter settings"</div>
+            }
+         </div>;
 };
 
 export default PokemonList;
