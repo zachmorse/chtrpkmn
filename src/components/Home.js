@@ -58,36 +58,26 @@ export default class Home extends Component {
     });
   };
 
-  applyFilters = (input, parameters, value) => {
-    let parsed = [];
-    if (parameters.length > 0) {
-      input.forEach(element => {
-        if (_.difference(parameters, element[value]).length === 0) {
-          parsed.push(element);
-        }
-      });
-      return parsed;
-    }
+  applyFilters = (input, types, weaknesses) => {
+    console.log(input, types, weaknesses);
     return input;
+    // let parsed = [];
+    // if (parameters.length > 0) {
+    //   input.forEach(element => {
+    //     if (_.difference(parameters, element[value]).length === 0) {
+    //       parsed.push(element);
+    //     }
+    //   });
+    //   return parsed;
+    // }
+    // return input;
   };
 
   parseSearchResults = (input, searchTerm, types, weaknesses) => {
-    let resultant = [];
-
-    if (searchTerm === "") {
-      resultant = input;
+    if (!searchTerm) {
+      return input;
     }
-
-    if (searchTerm !== "" && searchTerm !== undefined) {
-      input.forEach(element => {
-        if (element.name.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1) {
-          resultant.push(element);
-        }
-      });
-    }
-
-    resultant = this.applyFilters(this.applyFilters(resultant, types, "type"), weaknesses, "weaknesses");
-    return resultant;
+    return this.applyFilters(input.filter(element => element.name.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1), types, weaknesses);
   };
 
   async componentDidMount() {
