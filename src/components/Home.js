@@ -34,23 +34,17 @@ function Home() {
     e.preventDefault();
 
     let searched = !searchTerm ? masterData : masterData.filter(element => element.name.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1);
-    let typeFiltered = selectedTypes.length > 0 
-      ? searched.filter(element => _.difference(selectedTypes, element.type).length === 0) 
-      : searched;
-    let weaknessFiltered = selectedWeaknesses.length > 0 
-    ? typeFiltered.filter(element => _.difference(selectedWeaknesses, element.weaknesses).length === 0) 
-    : typeFiltered;
-    
+    let typeFiltered = selectedTypes.length > 0 ? searched.filter(element => _.difference(selectedTypes, element.type).length === 0) : searched;
+    let weaknessFiltered = selectedWeaknesses.length > 0 ? typeFiltered.filter(element => _.difference(selectedWeaknesses, element.weaknesses).length === 0) : typeFiltered;
+
     setDisplayData(weaknessFiltered);
   };
 
   const handleWeaknessChange = e => {
-    console.log(e);
     updateSelectedWeaknesses(e);
   };
 
   const handleTypeChange = e => {
-    console.log(e);
     updateSelectedTypes(e);
   };
 
