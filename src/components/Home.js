@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import { Multiselect } from "multiselect-react-dropdown";
 import _ from "lodash";
 import axios from "axios";
@@ -6,119 +6,80 @@ import "../styles/home.css";
 
 import PokemonList from "./PokemonList";
 
-export default class Home extends Component {
-  state = {
-    data: [],
-    searchTerm: "",
-    types: ["Fire", "Water", "Grass", "Electric", "Psychic", "Normal", "Flying", "Ghost", "Poison", "Ice", "Ground", "Rock", "Dragon", "Fighting", "Bug"],
-    weaknesses: ["Fire", "Water", "Grass", "Electric", "Psychic", "Normal", "Fairy", "Dark", "Steel", "Flying", "Ghost", "Poison", "Ice", "Ground", "Rock", "Dragon", "Fighting", "Bug"],
-    isloaded: false,
-    enoughData: true,
-    checkedTypes: [],
-    checkedWeaknesses: []
-  };
+function Home() {
+  const [masterData, setMasterData] = useState([]);
+  const [isLoaded, toggleLoaded] = useState(false);
+  const [searchTerm, updateSearchTerm] = useState("");
+  const [displayData, setDisplayData] = useState([]);
+  const [selectedTypes, updateSelectedTypes] = useState([]);
+  const [selectedWeaknesses, updateSelectedWeaknesses] = useState([]);
 
-  fetchItems = (searchTerm = "", types = [], weaknesses = []) => {
+  const types = ["Fire", "Water", "Grass", "Electric", "Psychic", "Normal", "Flying", "Ghost", "Poison", "Ice", "Ground", "Rock", "Dragon", "Fighting", "Bug"];
+  const weaknesses = ["Fire", "Water", "Grass", "Electric", "Psychic", "Normal", "Fairy", "Dark", "Steel", "Flying", "Ghost", "Poison", "Ice", "Ground", "Rock", "Dragon", "Fighting", "Bug"];
+
+  useEffect(() => {
     axios
       .get(`https://raw.githubusercontent.com/Biuni/PokemonGO-Pokedex/master/pokedex.json`)
       .then(response => {
-        let parsedResponse = this.parseSearchResults(response.data.pokemon, searchTerm, types, weaknesses);
-        this.setState({
-          data: parsedResponse,
-          isloaded: true,
-          enoughData: parsedResponse.length >= 1 ? true : false
-        });
+        setMasterData(response.data.pokemon);
+        setDisplayData(response.data.pokemon);
+        toggleLoaded(true);
       })
       .catch(err => {
         console.log("ERROR:", err);
       });
-  };
+  }, []);
 
-  handleFormSubmit = e => {
-    let { searchTerm, checkedTypes, checkedWeaknesses } = this.state;
+  const updateResults = e => {
     e.preventDefault();
-    this.fetchItems(searchTerm, checkedTypes, checkedWeaknesses);
+
+    let searched = !searchTerm ? masterData : masterData.filter(element => element.name.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1);
+    let typeFiltered = selectedTypes.length > 0 
+      ? searched.filter(element => _.difference(selectedTypes, element.type).length === 0) 
+      : searched;
+    let weaknessFiltered = selectedWeaknesses.length > 0 
+    ? typeFiltered.filter(element => _.difference(selectedWeaknesses, element.weaknesses).length === 0) 
+    : typeFiltered;
+    
+    setDisplayData(weaknessFiltered);
   };
 
-  handleSearchChange = e => {
-    this.setState({
-      searchTerm: e.target.value
-    });
+  const handleWeaknessChange = e => {
+    console.log(e);
+    updateSelectedWeaknesses(e);
   };
 
-  handleTypeChange = e => {
-    this.setState({
-      checkedTypes: e
-    });
+  const handleTypeChange = e => {
+    console.log(e);
+    updateSelectedTypes(e);
   };
 
-  handleWeaknessChange = e => {
-    this.setState({
-      checkedWeaknesses: e
-    });
-  };
-
-  applyFilters = (input, parameters, value) => {
-    let parsed = [];
-    if (parameters.length > 0) {
-      input.forEach(element => {
-        if (_.difference(parameters, element[value]).length === 0) {
-          parsed.push(element);
-        }
-      });
-      return parsed;
-    }
-    return input;
-  };
-
-  parseSearchResults = (input, searchTerm, types, weaknesses) => {
-    let resultant = [];
-
-    if (searchTerm === "") {
-      resultant = input;
-    }
-
-    if (searchTerm !== "" && searchTerm !== undefined) {
-      input.forEach(element => {
-        if (element.name.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1) {
-          resultant.push(element);
-        }
-      });
-    }
-
-    resultant = this.applyFilters(this.applyFilters(resultant, types, "type"), weaknesses, "weaknesses");
-    return resultant;
-  };
-
-  async componentDidMount() {
-    await this.fetchItems();
-  }
-
-  render() {
-    const { data, isloaded, searchTerm, enoughData, types, weaknesses, checkedTypes, checkedWeaknesses } = this.state;
-
-    return (
-      <div>
-        <h1 className="headerTitle">Gotta Catch 'Em All!</h1>
-        <div className="form" style={{ textAlign: "center", marginBottom: "30px" }}>
-          <form onSubmit={this.handleFormSubmit}>
-            <input type="text" value={searchTerm} placeholder="Enter search term" onChange={this.handleSearchChange} />
-            <label className="selectBox">
-              <div className="selectBox">
-                <Multiselect options={types} isObject={false} onSelect={this.handleTypeChange} onRemove={this.handleTypeChange} selectedvalues={checkedTypes} placeholder={"Filter Types:"} />
-              </div>
-            </label>
-            <label>
-              <div className="selectBox">
-                <Multiselect options={weaknesses} isObject={false} onSelect={this.handleWeaknessChange} onRemove={this.handleWeaknessChange} selectedvalues={checkedWeaknesses} placeholder={"Filter Weaknesses:"} />
-              </div>
-            </label>
-            <input type="submit" value="search" />
-          </form>
+  return (
+    <div>
+      {isLoaded && (
+        <div>
+          <h1 className="headerTitle">Gotta Catch 'Em All!</h1>
+          <div className="form" style={{ textAlign: "center", marginBottom: "30px" }}>
+            <form onSubmit={updateResults}>
+              <input type="text" value={searchTerm} placeholder="Enter search term" onChange={e => updateSearchTerm(e.target.value)} />
+              <label className="selectBox">
+                <div className="selectBox">
+                  <Multiselect options={types} isObject={false} onSelect={handleTypeChange} onRemove={handleTypeChange} selectedvalues={selectedTypes} placeholder={"Filter Types:"} />
+                </div>
+              </label>
+              <label>
+                <div className="selectBox">
+                  <Multiselect options={weaknesses} isObject={false} onSelect={handleWeaknessChange} onRemove={handleWeaknessChange} selectedvalues={selectedWeaknesses} placeholder={"Filter Weaknesses:"} />
+                </div>
+              </label>
+              <input type="submit" value="search" />
+            </form>
+          </div>
+          <PokemonList stuff={displayData} renderList={displayData.length > 0} />
         </div>
-        {isloaded && <PokemonList stuff={data} renderList={enoughData} />}
-      </div>
-    );
-  }
+      )}
+    </div>
+  );
 }
 
+export default Home;
