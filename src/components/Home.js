@@ -5,6 +5,7 @@ import axios from "axios";
 import "../styles/home.css";
 
 import PokemonList from "./PokemonList";
+import Loading from "./Loading";
 
 function Home() {
   const [masterData, setMasterData] = useState([]);
@@ -50,7 +51,9 @@ function Home() {
 
   return (
     <div>
-      {isLoaded && (
+      {!isLoaded ? (
+        <Loading />
+      ) : (
         <div>
           <h1 className="headerTitle">Gotta Catch 'Em All!</h1>
           <div className="form" style={{ textAlign: "center", marginBottom: "30px" }}>
